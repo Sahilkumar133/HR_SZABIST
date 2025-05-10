@@ -84,7 +84,7 @@ app.get('/emp&jh&cou', async (req, res) => {
 /*q 46*/
 app.get('/jh&emp&dep', async (req, res) => {
     try{
-        const result = await pool.query('select e.employee_id, e.first_name,e.last_name,jh.job_id,jh.start_date, d.department_id, d.department_name from job_history jh left outer join employees e on jh.employee_id = e.employee_id  left outerjoin  departments d on jh.department_id = ddepartment_id limit 5')
+        const result = await pool.query('select e.employee_id, e.first_name,e.last_name,jh.job_id,jh.start_date, d.department_id, d.department_name from job_history jh left outer join employees e on jh.employee_id = e.employee_id  left outer join  departments d on jh.department_id = d.department_id limit 5')
         res.json(result.rows);
     } catch(error) {
         res.status(500).json({Error: error.message})
@@ -154,7 +154,7 @@ app.get('/cou&reh&loc', async (req, res) => {
 
 
 /*q 53*/
-app.get('/emp-count', async (req, res) => {
+app.get('/loc&cou&reg', async (req, res) => {
     try{
         const result = await pool.query('select r.region_id,r.region_name, c.country_id,c.country_name,l.location_id,l.postal_code,l.city from regions r inner join countries c on r.region_id = c.region_id inner join locations l on c.country_id =l.country_id limit 5')
         res.json(result.rows);
@@ -177,7 +177,7 @@ app.get('/dep&emp&loc', async (req, res) => {
 
 app.get('/emp&dep&loc&cou', async (req, res) => {
     try{
-        const result = await pool.query('select e.employee_id, e.first_name,e.last_name,d.department_id, d.department_name,l.state_province, l.location_id,l.city ,c.country_id,c.country_name from employees e inner join departments d on  e.department_id = d.department_id inner join locations l on d.location_id = l.location_id inner join countrieson  l.country_id = c.country_id limit 5')
+        const result = await pool.query('select e.first_name, e.last_name, d.department_name, l.city, c.country_name from employees e join departments d on e.department_id = d.department_id join locations l on d.location_id = l.location_id join countries c on l.country_id = c.country_id limit 5')
         res.json(result.rows);
     } catch(error) {
         res.status(500).json({Error: error.message})
@@ -229,6 +229,107 @@ app.get('/emp&job&dep&man&loc', async (req, res) => {
 app.get('/cou_rid1', async (req, res) => {
     try{
         const result = await pool.query('select country_name,country_id,region_id from countries where region_id = 1')
+        res.json(result.rows);
+    } catch(error) {
+        res.status(500).json({Error: error.message})
+    }
+})
+
+
+/*q 61*/
+
+app.get('/dep&cityN', async (req, res) => {
+    try{
+        const result = await pool.query("Select d.department_id, d.department_name, l.city from departments d join locations l on d.location_id = l.location_id where lower(l.city) like 'n%' limit 5")
+        res.json(result.rows);
+    } catch(error) {
+        res.status(500).json({Error: error.message})
+    }
+})
+/*q 62*/
+app.get('/emp&ct', async (req, res) => {
+    try{
+        const result = await pool.query('Select e.first_name, e.last_name, e.salary, d.department_name, e.commission_pct from employees e join departments d on e.department_id = d.department_id join employees em on d.manager_id = e.manager_id where commission_pct > 0.15 limit 5')
+        res.json(result.rows);
+    } catch(error) {
+        res.status(500).json({Error: error.message})
+    }
+})
+
+/*q 63*/
+app.get('/job&man', async (req, res) => {
+    try{
+        const result = await pool.query('Select jh.job_id, jh.job_title, e.first_name, e.first_name as manager_name from employees e join job_histoty jh on e.employee_id = jh.employee_id where employee_id in ( select manager_id from employees where manager_id is not null) limit 5;')
+        res.json(result.rows);
+    } catch(error) {
+        res.status(500).json({Error: error.message})
+    }
+})
+
+/*q 64*/
+app.get('/loc&couaAsia', async (req, res) => {
+    try{
+        const result = await pool.query("Select l.postal_code, c.country_name, r.region_name from locations l join countries c on l.country_id = c.country_id join regions r on c.region_id = r.region_id where r.region name = 'Asia' limit 5")
+        res.json(result.rows);
+    } catch(error) {
+        res.status(500).json({Error: error.message})
+    }
+})
+
+/*q 65*/
+app.get('/dep&emp&cp', async (req, res) => {
+    try{
+        const result = await pool.query('Select d.department_name, e.first_name, e.commission_pct from departments d join employees e on d.department_id = e.department_id where commission pct < (Select avg(commission_pct) as avg_com from employees where commission_pct is not null) limit 5')
+        res.json(result.rows);
+    } catch(error) {
+        res.status(500).json({Error: error.message})
+    }
+})
+
+/*q 66*/
+app.get('/job&emp&sal', async (req, res) => {
+    try{
+        const result = await pool.query('Select jh.job_title, e.first_name, e.salary from job_history jh join employees e on jh.employee_id = e.employee_id where e.salary > (Select avg(salary) from employees e on department_id = d.department_id limit 5')
+        res.json(result.rows);
+    } catch(error) {
+        res.status(500).json({Error: error.message})
+    }
+})
+
+/*q 67*/
+
+app.get('/emp&depnull', async (req, res) => {
+    try{
+        const result = await pool.query('select employee_id from employees where department_id is null')
+        res.json(result.rows);
+    } catch(error) {
+        res.status(500).json({Error: error.message})
+    }
+})
+
+/*q 68*/
+app.get('/emp&jobposi', async (req, res) => {
+    try{
+        const result = await pool.query('SELECT e.first_name, e.last_name FROM employees e WHERE EXISTS ( SELECT 1 FROM job_history jh WHERE jh.employee_id = e.employee_id GROUP BY jh.employee_id HAVING COUNT(*) > 1) limit 5')
+        res.json(result.rows);
+    } catch(error) {
+        res.status(500).json({Error: error.message})
+    }
+})
+
+/*q 69*/
+app.get('/emp-count', async (req, res) => {
+    try{
+        const result = await pool.query('Select department_id, count(department_id) as dept_count from employees group by department_id limit 5')
+        res.json(result.rows);
+    } catch(error) {
+        res.status(500).json({Error: error.message})
+    }
+})
+ /*q 70*/
+ app.get('/totalsalary', async (req, res) => {
+    try{
+        const result = await pool.query('select job_id, sum(salary) as total_salary from employees group by job_id limit 5')
         res.json(result.rows);
     } catch(error) {
         res.status(500).json({Error: error.message})
