@@ -259,7 +259,7 @@ app.get('/emp&ct', async (req, res) => {
 /*q 63*/
 app.get('/job&man', async (req, res) => {
     try{
-        const result = await pool.query('Select jh.job_id, jh.job_title, e.first_name, e.first_name as manager_name from employees e join job_histoty jh on e.employee_id = jh.employee_id where employee_id in ( select manager_id from employees where manager_id is not null) limit 5;')
+        const result = await pool.query('Select jh.job_id, jh.job_title, e.first_name, e.first_name as manager_name from employees e join job_history jh on e.employee_id = jh.employee_id where employee_id in ( select manager_id from employees where manager_id is not null) limit 5;')
         res.json(result.rows);
     } catch(error) {
         res.status(500).json({Error: error.message})
@@ -336,6 +336,115 @@ app.get('/emp-count', async (req, res) => {
     }
 })
 
+/*q 71*/
+app.get('/avg_cm', async (req, res) => {
+    try{
+        const result = await pool.query('select department_id, avg(commission_pct) as avg_commission from employees group by department_id limit 5')
+        res.json(result.rows);
+    } catch(error) {
+        res.status(500).json({Error: error.message})
+    }
+})
+
+/*q 72 a*/
+app.get('/max_sal', async (req, res) => {
+    try{
+        const result = await pool.query('select c.country_id, max(e.salary) as max_salary from employees e join departments d on e.department_id = d.department_id join locations l on d.location_id = l.location_id join countries c on l.country_id = c.country_id group by c.country_id limit 5')
+        res.json(result.rows);
+    } catch(error) {
+        res.status(500).json({Error: error.message})
+    }
+})
+
+/*q 72 b*/
+app.get('/empz', async (req, res) => {
+    try{
+        const result = await pool.query('select e.first_name, e.last_name, d.department_name, l.city, l.state_province from employees e join departments d on e.department_id = d.department_id join locations l on d.location_id = l.location_id where lower(e.first_name) like '%z%' limit 5')
+        res.json(result.rows);
+    } catch(error) {
+        res.status(500).json({Error: error.message})
+    }
+})
+
+/*q 73*/
+app.get('/job&emp&date', async (req, res) => {
+    try{
+        const result = await pool.query("select j.job_title, d.department_name, concat(e.first_name , ' ' , e.last_name)as full_name, jh.start_date from job_history jh join employees e on jh.employee_id = e.employee_id join jobs j on jh.job_id = j.job_id join departments d on jh.department_id= d.department_id where jh.start_date >= '1993-01-01' and jh.end_date <= '1997-08-31'Limit 5")
+        res.json(result.rows);
+    } catch(error) {
+        res.status(500).json({Error: error.message})
+    }
+})
+
+/*q 74*/
+app.get('/cou&city&dep', async (req, res) => {
+    try{
+        const result = await pool.query('select c.country_name, l.city, count(d.department_id) as department_count from employees e join departments d on e.department_id = d.department_id join locations l on d.location_id = l.location_id join countries c on l.country_id = c.country_id group by c.country_name, l.city having count(e.employee_id) >= 2 limit 5')
+        res.json(result.rows);
+    } catch(error) {
+        res.status(500).json({Error: error.message})
+    }
+})
+
+/*q 75*/
+app.get('/without_com', async (req, res) => {
+    try{
+        const result = await pool.query("select concat(e.first_name, ' ' ,e.last_name )as full_name, j.job_title,jh.start_date, jh.end_date from employees e join job_history jh on e.employee_id = jh.employee_id join jobs j on jh.job_id = j.job_id where e.commission_pct is null and jh.end_date = (select max(jh2.end_date) from job_history jh2 where jh2.employee_id = e.employee_id) limit 5")
+        res.json(result.rows);
+    } catch(error) {
+        res.status(500).json({Error: error.message})
+    }
+})
+
+/*q 76*/
+app.get('/emp_work', async (req, res) => {
+    try{
+        const result = await pool.query("select concat(e.first_name, ' ' ,e.last_name ) as full_name, e.employee_id,c.country_name from employees e join departments d on e.department_id = d.department_id join locations l on d.location_id = l.location_id join countries c on l.country_id = c.country_id limit 5")
+        res.json(result.rows);
+    } catch(error) {
+        res.status(500).json({Error: error.message})
+    }
+})
+
+/*q 77*/
+app.get('/earn_salary', async (req, res) => {
+    try{
+        const result = await pool.query('select first_name, last_name, salary, department_id from employees where salary in (select min(salary) from employees group by department_id) limit 5')
+        res.json(result.rows);
+    } catch(error) {
+        res.status(500).json({Error: error.message})
+    }
+})
+
+/*q 78*/
+app.get('/third_high', async (req, res) => {
+    try{
+        const result = await pool.query('select * from employees where salary = ( select distinct salary from employees order by salary desc offset 2 rows fetch next 1 row only )')
+        res.json(result.rows);
+    } catch(error) {
+        res.status(500).json({Error: error.message})
+    }
+})
+
+/*q 79*/
+app.get('/empj', async (req, res) => {
+    try{
+        const result = await pool.query("select e.employee_id, concat(e.first_name,' ' ,e.last_name) as full_name, e.salary from employees e where salary > (select avg(salary) from employees) and department_id in ( select department_id from employees where first_name like '%j%' or last_name like '%j%') limit 5")
+        res.json(result.rows);
+    } catch(error) {
+        res.status(500).json({Error: error.message})
+    }
+})
+
+/*q 80*/
+app.get('/toronto', async (req, res) => {
+    try{
+        const result = await pool.query("select concat(e.first_name,' ' ,e.last_name)  as full_name, e.employee_id, j.job_title from employees e join jobs j on e.job_id = j.job_id join departments d on e.department_id = d.department_id join locations l on d.location_id = l.location_id where l.city = 'toronto' limit 5")
+        res.json(result.rows);
+    } catch(error) {
+        res.status(500).json({Error: error.message})
+    }
+})
 
 /*ending code*/
 
