@@ -249,7 +249,7 @@ app.get('/dep&cityN', async (req, res) => {
 /*q 62*/
 app.get('/emp&ct', async (req, res) => {
     try{
-        const result = await pool.query('Select e.first_name, e.last_name, e.salary, d.department_name, e.commission_pct from employees e join departments d on e.department_id = d.department_id join employees em on d.manager_id = e.manager_id where commission_pct > 0.15 limit 5')
+        const result = await pool.query('select e.employee_id, e.first_name, e.last_name,d.department_id,e.manager_id,e.commission_pct from employees e inner join departments d on  e.department_id = d.department_id inner join employees m on d.manager_id = m.employee_id  where m.commission_pct >  0.15 limit 5')
         res.json(result.rows);
     } catch(error) {
         res.status(500).json({Error: error.message})
@@ -259,7 +259,7 @@ app.get('/emp&ct', async (req, res) => {
 /*q 63*/
 app.get('/job&man', async (req, res) => {
     try{
-        const result = await pool.query('Select jh.job_id, jh.job_title, e.first_name, e.first_name as manager_name from employees e join job_history jh on e.employee_id = jh.employee_id where employee_id in ( select manager_id from employees where manager_id is not null) limit 5;')
+        const result = await pool.query('select DISTINCT m.employee_id, m.first_name, m.last_name, m.email, m.job_id,m.manager_id  frOM employees e JOIN employees m ON e.manager_id = m.employee_id limit 5')
         res.json(result.rows);
     } catch(error) {
         res.status(500).json({Error: error.message})
@@ -269,7 +269,7 @@ app.get('/job&man', async (req, res) => {
 /*q 64*/
 app.get('/loc&couaAsia', async (req, res) => {
     try{
-        const result = await pool.query("Select l.postal_code, c.country_name, r.region_name from locations l join countries c on l.country_id = c.country_id join regions r on c.region_id = r.region_id where r.region name = 'Asia' limit 5")
+        const result = await pool.query("Select l.postal_code, c.country_name, r.region_name from locations l join countries c on l.country_id = c.country_id join regions r on c.region_id = r.region_id where r.region_name = 'Asia' limit 5")
         res.json(result.rows);
     } catch(error) {
         res.status(500).json({Error: error.message})
@@ -279,7 +279,7 @@ app.get('/loc&couaAsia', async (req, res) => {
 /*q 65*/
 app.get('/dep&emp&cp', async (req, res) => {
     try{
-        const result = await pool.query('Select d.department_name, e.first_name, e.commission_pct from departments d join employees e on d.department_id = e.department_id where commission pct < (Select avg(commission_pct) as avg_com from employees where commission_pct is not null) limit 5')
+        const result = await pool.query('select  d.department_name ,d.department_id FROM employees e JOIN departments d ON e.department_id = d.department_id WHERE e.commission_pct < (SELECT AVG(commission_pct) FROM employees) limit 5')
         res.json(result.rows);
     } catch(error) {
         res.status(500).json({Error: error.message})
@@ -287,9 +287,9 @@ app.get('/dep&emp&cp', async (req, res) => {
 })
 
 /*q 66*/
-app.get('/job&emp&sal', async (req, res) => {
+app.get('/job&emp&sala', async (req, res) => {
     try{
-        const result = await pool.query('Select jh.job_title, e.first_name, e.salary from job_history jh join employees e on jh.employee_id = e.employee_id where e.salary > (Select avg(salary) from employees e on department_id = d.department_id limit 5')
+        const result = await pool.query('SELECT DISTINCT j.job_title FROM employees e JOIN jobs j ON e.job_id = j.job_id WHERE e.salary > (SELECT AVG(e2.salary)FROM employees e2 WHERE e2.department_id = e.department_id)')
         res.json(result.rows);
     } catch(error) {
         res.status(500).json({Error: error.message})
@@ -357,9 +357,9 @@ app.get('/max_sal', async (req, res) => {
 })
 
 /*q 72 b*/
-app.get('/empz', async (req, res) => {
+app.get('/emp_z', async (req, res) => {
     try{
-        const result = await pool.query('select e.first_name, e.last_name, d.department_name, l.city, l.state_province from employees e join departments d on e.department_id = d.department_id join locations l on d.location_id = l.location_id where lower(e.first_name) like '%z%' limit 5')
+        const result = await pool.query("select e.first_name, e.last_name, d.department_name, l.city, l.state_province from employees e join departments d on e.department_id = d.department_id join locations l on d.location_id = l.location_id where lower(e.first_name) like '%z%' limit 5")
         res.json(result.rows);
     } catch(error) {
         res.status(500).json({Error: error.message})
@@ -439,7 +439,7 @@ app.get('/empj', async (req, res) => {
 /*q 80*/
 app.get('/toronto', async (req, res) => {
     try{
-        const result = await pool.query("select concat(e.first_name,' ' ,e.last_name)  as full_name, e.employee_id, j.job_title from employees e join jobs j on e.job_id = j.job_id join departments d on e.department_id = d.department_id join locations l on d.location_id = l.location_id where l.city = 'toronto' limit 5")
+        const result = await pool.query("SELECT CONCAT(e.first_name, ' ', e.last_name) AS full_name, e.employee_id, j.job_title FROM employees e JOIN departments d ON e.department_id = d.department_id JOIN locations l ON d.location_id = l.location_id JOIN jobs j ON e.job_id = j.job_id WHERE l.city = 'Toronto' ")
         res.json(result.rows);
     } catch(error) {
         res.status(500).json({Error: error.message})
