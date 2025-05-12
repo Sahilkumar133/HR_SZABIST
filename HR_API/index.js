@@ -8,6 +8,8 @@ app.use(cors());
 app.use(express.json());
 
 
+
+
 app.get('/', async (req, res) => {
     try{
         res.json('Welcome to HR API')
@@ -16,9 +18,26 @@ app.get('/', async (req, res) => {
     }
 })
 
+app.get('/country', async (req, res) => {
+    try{
+        const result = await pool.query('select * from countries')
+        res.json(result.rows);
+    } catch(error) {
+        res.status(500).json({Error: error.message})
+    }
+})
+app.get('/employees', async (req, res) => {
+    try{
+        const result = await pool.query('select * from employees')
+        res.json(result.rows);
+    } catch(error) {
+        res.status(500).json({Error: error.message})
+    }
+})
+
 /*q 40*/
 
-app.get('/employees', async (req, res) => {
+app.get('/employee', async (req, res) => {
     try{
         const result = await pool.query('select  e.employee_id,e.first_name, e.last_name,d.department_id,d.department_name,l.location_id,c.country_id,r.region_id from employees e inner join departments d on e.department_id = d.department_id inner join locations l on d.location_id = l.location_id inner join countries c on l.country_id = c.country_id  inner join regions r on c.region_id = r.region_id limit 5')
         res.json(result.rows);
