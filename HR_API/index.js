@@ -17,7 +17,7 @@ app.get('/', async (req, res) => {
         res.status(500).json({Error: error.message})
     }
 })
-
+/*frontend data fetch querries*/
 app.get('/country', async (req, res) => {
     try{
         const result = await pool.query('select * from countries')
@@ -35,6 +35,47 @@ app.get('/employees', async (req, res) => {
     }
 })
 
+app.get('/locations', async (req, res) => {
+    try{
+        const result = await pool.query('select * from locations')
+        res.json(result.rows);
+    } catch(error) {
+        res.status(500).json({Error: error.message})
+    }
+})
+
+app.get('/jobs', async (req, res) => {
+    try{
+        const result = await pool.query('select * from jobs')
+        res.json(result.rows);
+    } catch(error) {
+        res.status(500).json({Error: error.message})
+    }
+})
+app.get('/regions', async (req, res) => {
+    try{
+        const result = await pool.query('select * from regions')
+        res.json(result.rows);
+    } catch(error) {
+        res.status(500).json({Error: error.message})
+    }
+})
+app.get('/jhistory', async (req, res) => {
+    try{
+        const result = await pool.query('select * from job_history')
+        res.json(result.rows);
+    } catch(error) {
+        res.status(500).json({Error: error.message})
+    }
+})
+app.get('/departments', async (req, res) => {
+    try{
+        const result = await pool.query('select * from departments')
+        res.json(result.rows);
+    } catch(error) {
+        res.status(500).json({Error: error.message})
+    }
+})
 /*q 40*/
 
 app.get('/employee', async (req, res) => {

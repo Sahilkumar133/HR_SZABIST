@@ -4,7 +4,7 @@ fetch(country_URL).then(response=>{
         throw new Error("Failed to Fetch Country Data");
     return response.json();
 }).then(data=>{
-    const tbody = document.querySelector("#countrytable tbody");
+    const tbody = document.querySelector("#country_table tbody");
     data.forEach(country=>{
         const row = document.createElement("tr");
         row.innerHTML = `
